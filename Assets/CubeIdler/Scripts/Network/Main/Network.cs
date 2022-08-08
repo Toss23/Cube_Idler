@@ -1,6 +1,7 @@
 using System;
 using Firebase.Database;
 using Firebase.Extensions;
+using UnityEngine;
 
 public class Network
 {
@@ -11,10 +12,10 @@ public class Network
         _reference = FirebaseDatabase.DefaultInstance.RootReference;
     }
 
-    public void Request<T>(string path, Action<PackageData<T>> onRequested)
+    public void Request<T>(string path, Action<NetData<T>> onRequested)
     {
         path = path.ToLower();
-        PackageData<T> requestData = new PackageData<T>();
+        NetData<T> requestData = new NetData<T>();
 
         _reference.Child(path).GetValueAsync().ContinueWithOnMainThread(task =>
         {
@@ -24,17 +25,24 @@ public class Network
             }
             else if (task.IsCompleted)
             {
-                Type resultType = task.Result.Value.GetType();
-                Type requestType = typeof(T);
-
-                if (Equals(resultType, requestType) == false)
+                if (task.Result.Exists)
                 {
-                    requestData.Status = RequestStatus.Denied;
+                    Type resultType = task.Result.Value.GetType();
+                    Type requestType = typeof(T);
+
+                    if (Equals(resultType, requestType) == false)
+                    {
+                        requestData.Status = RequestStatus.DifferentTypes;
+                    }
+                    else
+                    {
+                        requestData.Status = RequestStatus.Completed;
+                        requestData.Value = (T)task.Result.Value;
+                    }
                 }
                 else
                 {
-                    requestData.Status = RequestStatus.Completed;
-                    requestData.Value = (T)task.Result.Value;
+                    requestData.Status = RequestStatus.NotExists;
                 }
             }
 
@@ -42,10 +50,10 @@ public class Network
         });
     }
 
-    public void Post<T>(string path, T value, Action<PackageData<T>> onPosted)
+    public void Post<T>(string path, T value, Action<NetData<T>> onPosted)
     {
         path = path.ToLower();
-        PackageData<T> postData = new PackageData<T>();
+        NetData<T> postData = new NetData<T>();
         postData.Value = value;
 
         _reference.Child(path).SetValueAsync(value).ContinueWithOnMainThread(task => 
@@ -88,10 +96,10 @@ public class Network
 
 public enum RequestStatus
 {
-    Completed, Denied
+    Completed, Denied, NotExists, DifferentTypes
 }
 
-public struct PackageData<T>
+public struct NetData<T>
 {
     public RequestStatus Status;
     public T Value;

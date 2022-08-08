@@ -1,12 +1,8 @@
-using System;
-using System.Reflection;
 using UnityEngine;
 
 public class TimeHandler : MonoBehaviour
 {
     public static TimeHandler Instance;
-
-    public event Action OnSynchronized;
 
     private bool _isSynchronized;
     private double _milliseconds;
@@ -27,7 +23,6 @@ public class TimeHandler : MonoBehaviour
         {
             _milliseconds = milliseconds;
             _isSynchronized = true;
-            OnSynchronized?.Invoke();
         });
     }
 
