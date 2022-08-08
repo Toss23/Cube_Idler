@@ -1,2 +1,2 @@
-# Cube_Idler
- 
+# Cube Idler (Online Idler Game)
+by Toss
