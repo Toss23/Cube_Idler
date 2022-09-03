@@ -28,6 +28,7 @@ public class LoginPresenter : MonoBehaviour
         _loginView.OnClickLogin += OnClickLogin;
         _loginForm.OnAuthSuccess += OnAuthSuccess;
         _loginForm.OnAuthDenied += OnAuthDenied;
+        _loginForm.OnIncorrectParams += OnIncorrectParams;
     }
 
     public void Disable()
@@ -35,12 +36,19 @@ public class LoginPresenter : MonoBehaviour
         _loginView.OnClickLogin -= OnClickLogin;
         _loginForm.OnAuthSuccess -= OnAuthSuccess;
         _loginForm.OnAuthDenied -= OnAuthDenied;
+        _loginForm.OnIncorrectParams -= OnIncorrectParams;
     }
 
     private void OnClickLogin(string login, string password)
     {
-        _toast.Show("Request Account permission");
+        _toast.ShowLoading("Request Account permission");
         _loginForm.Auth(login, password);
+    }
+
+    private void OnIncorrectParams()
+    {
+        _toast.Hide();
+        _toast.ShowInfo("Error", "Login and password minimum 3 sign");
     }
 
     private void OnAuthSuccess(string login)
@@ -53,5 +61,6 @@ public class LoginPresenter : MonoBehaviour
     private void OnAuthDenied(RequestStatus status)
     {
         _toast.Hide();
+        _toast.ShowInfo("Error", "Permission denied");
     }
 }
